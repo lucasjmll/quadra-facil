@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Quadra, Horario, Reserva
 from .serializers import QuadraSerializer, ReservaSerializer, HorarioSerializer
+from .whatsapp_service import enviar_mensagem_whatsapp
+
 
 class QuadraView(APIView):
     def get(self, request, format=None):
@@ -69,36 +71,33 @@ class ReservaView(APIView):
         return Response(serializer.data)
     
     def post(self, request, format=None):
-        # Coleta dados da reserva
         horario_id = request.data.get('horario')
         nome_reservante = request.data.get('nome_reservante')
         telefone_reservante = request.data.get('telefone_reservante')
 
-        # Verifica se o horário existe
         try:
             horario = Horario.objects.get(id=horario_id)
         except Horario.DoesNotExist:
             return Response({'error': 'Horário não encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Verifica se o horário está disponível
         if horario.status == 'reservado':
             return Response({'error': 'Horário já reservado'}, status=status.HTTP_400_BAD_REQUEST)
         
-        # Cria a reserva
         reserva = Reserva.objects.create(
             horario=horario,
             nome_reservante=nome_reservante,
             telefone_reservante=telefone_reservante
         )
         
-        # Atualiza o status do horário para reservado
         horario.status = 'reservado'
         horario.save()
 
-        # Envia a mensagem de WhatsApp
-        #self.enviar_whatsapp(nome_reservante, telefone_reservante, horario)
+        # Enviar mensagem via WhatsApp
+        try:
+            enviar_mensagem_whatsapp(nome_reservante, telefone_reservante, horario)
+        except Exception as e:
+            return Response({'error': f'Falha ao enviar mensagem: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # Retorna os dados da reserva criada
         serializer = ReservaSerializer(reserva)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     

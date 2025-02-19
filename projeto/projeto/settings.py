@@ -78,9 +78,9 @@ WSGI_APPLICATION = 'projeto.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'quadrafacil',  
+        'NAME': 'quadra',  
         'USER': 'root',  
-        'PASSWORD': '123456La@', 
+        'PASSWORD': '', 
         'HOST': 'localhost',      
         'PORT': '3306',           
     }
@@ -127,3 +127,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+TWILIO_ACCOUNT_SID=your_account_sid
+TWILIO_AUTH_TOKEN=your_auth_token
+TWILIO_WHATSAPP_NUMBER=+14155238886  # Número do Twilio para WhatsApp
